@@ -10,7 +10,7 @@ export default function Logo({ size = 34 }: { size?: number }) {
       >
         <rect width="40" height="40" rx="12" fill="url(#dg)" />
         <path
-          d="M14 11h7.5c5.2 0 9 3.8 9 9s-3.8 9-9 9H14V11zm4.2 4v10h3.1c3 0 4.9-2 4.9-5s-1.9-5-4.9-5h-3.1z"
+          d="M18 10h4l7 20h-4.3l-1.4-4.3h-6.6L15.3 30H11l7-20zm2 4.9l-2.2 6.9h4.4L20 14.9z"
           fill="#fff"
         />
         <defs>
@@ -21,7 +21,7 @@ export default function Logo({ size = 34 }: { size?: number }) {
         </defs>
       </svg>
       <span className="text-lg font-bold tracking-tight text-white">
-        Dapur AI
+        AI Restorant
       </span>
     </span>
   );

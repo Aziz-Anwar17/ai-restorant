@@ -22,7 +22,7 @@ export default function ProductPreview() {
         <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
         <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
         <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
-        <span className="ml-3 text-xs text-zinc-500">app.dapur.ai / projects / podcast-ep-42</span>
+        <span className="ml-3 text-xs text-zinc-500">app.airestorant.com / projects / podcast-ep-42</span>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.15fr_1fr]">

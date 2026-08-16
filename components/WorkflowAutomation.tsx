@@ -28,7 +28,7 @@ export default function WorkflowAutomation() {
             Your video creation process — now on autopilot
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-zinc-400">
-            Create and publish videos 5x faster with Dapur AI&apos;s web app and
+            Create and publish videos 5x faster with AI Restorant&apos;s web app and
             API, so you can go on vacation and still keep your content rolling.
           </p>
         </Reveal>

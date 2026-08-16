@@ -22,7 +22,7 @@ export default function Hero() {
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base text-zinc-400 sm:text-lg">
-            Dapur AI turns long videos into shorts, and publishes them to all
+            AI Restorant turns long videos into shorts, and publishes them to all
             social platforms in one click.
           </p>
         </Reveal>

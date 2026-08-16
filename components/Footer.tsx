@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
         <div className="mt-12 border-t border-white/[0.06] pt-6">
           <p className="text-xs text-zinc-600">
-            © 2026 Dapur AI. All rights reserved.
+            © 2026 AI Restorant. All rights reserved.
           </p>
         </div>
       </div>
