@@ -18,10 +18,11 @@ const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: "Products & Solutions",
     links: [
-      { label: "AI POS & Order Management" },
-      { label: "Smart Inventory Forecasting" },
-      { label: "Autonomous Kitchen Operations" },
-      { label: "Menu Intelligence & Dynamic Pricing" },
+      { label: "AI Clipping" },
+      { label: "ClipAnything" },
+      { label: "AI Editor" },
+      { label: "Auto Captions & Reframe" },
+      { label: "Workflow Automation" },
       { label: "Product Changelog" },
       { label: "Feature Request" },
       { label: "AI Restorant Free Trial", badge: { text: "Free", style: "brand" } },
@@ -32,12 +33,12 @@ const columns: { title: string; links: FooterLink[] }[] = [
     title: "Resources & Support",
     links: [
       { label: "Case Studies & Customer Stories" },
-      { label: "Restaurant Growth Blog" },
+      { label: "Creator Growth Blog" },
       { label: "Partner & Affiliate Program" },
       { label: "Brand & Media Assets" },
       { label: "Help Center / Support Portal" },
       { label: "Learning Center (Guides & Webinars)" },
-      { label: "Industry Research & Reports" },
+      { label: "API & Developer Docs" },
     ],
   },
   {
@@ -87,10 +88,10 @@ export default function Footer() {
           <div className="md:col-span-2 lg:col-span-1">
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-400">
-              The AI operating system for modern restaurants.
+              Turn one long video into dozens of viral clips — automatically.
             </p>
             <p className="mt-3 text-xs text-zinc-500">
-              Trusted by 500+ restaurants worldwide
+              Trusted by 500,000+ creators worldwide
             </p>
 
             {/* Newsletter */}
@@ -109,7 +110,7 @@ export default function Footer() {
               </button>
             </form>
             <p className="mt-2 text-[11px] text-zinc-600">
-              Get restaurant AI insights, monthly. No spam.
+              Get AI video & creator insights, monthly. No spam.
             </p>
           </div>
 
