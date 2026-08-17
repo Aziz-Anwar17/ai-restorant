@@ -26,7 +26,7 @@ export default function CTA() {
               </h2>
               <p className="relative mt-3 text-zinc-400">No credit card required</p>
               <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <a href="#hero-upload" className="btn-primary">Get free clips</a>
+                <a href="#upload" className="btn-primary">Get free clips</a>
                 <a href="#ai-models" className="btn-secondary">See demos</a>
               </div>
             </div>
@@ -48,7 +48,7 @@ export default function CTA() {
               </p>
               <p className="text-xs text-zinc-500">No credit card required</p>
             </div>
-            <a href="#hero-upload" className="btn-primary shrink-0 !px-5 !py-2.5 text-xs sm:text-sm">
+            <a href="#upload" className="btn-primary shrink-0 !px-5 !py-2.5 text-xs sm:text-sm">
               Get free clips
             </a>
           </div>

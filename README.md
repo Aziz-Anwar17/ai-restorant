@@ -2,9 +2,29 @@
 
 **1 long video, 10 viral clips. Create 10x faster.**
 
-AI Restorant is a modern SaaS landing page for an AI video clipping platform — it turns long videos into shorts and publishes them to every social platform in one click. Built with a premium dark UI inspired by best-in-class AI SaaS products.
+AI Restorant is a working AI video clipping MVP: upload a video (or paste a YouTube link), and a real pipeline — Whisper transcription → Claude moment selection → FFmpeg rendering — produces vertical 9:16 clips with burned-in captions that you can preview and download. Wrapped in a premium dark SaaS UI.
 
 ![Hero](docs/hero.png)
+
+## ⚙️ How the pipeline works
+
+```
+Upload / YouTube URL → job queue → extract audio (ffmpeg)
+  → transcribe with timestamps (whisper.cpp)
+  → Claude selects the best self-contained moments (structured JSON + schema validation)
+  → ffmpeg cuts each segment, converts to 1080×1920 (9:16), burns ASS captions
+  → preview in the browser · download MP4 / ZIP
+```
+
+The pipeline requires local binaries (see **Requirements**) and runs on the Next.js server — the deployed Vercel site serves the UI, but processing requires a host with ffmpeg/whisper installed. `/api/health` reports honestly which dependencies are available.
+
+## 📋 Requirements (processing host)
+
+- `ffmpeg` **with libass** (`brew install ffmpeg-full`) and `ffprobe`
+- `whisper-cli` (whisper.cpp) + a ggml model (e.g. `ggml-small.bin`)
+- `yt-dlp` for YouTube ingestion
+- `ANTHROPIC_API_KEY` for clip selection
+- Copy `.env.example` → `.env.local` and fill in paths/keys
 
 ## ✨ Features
 

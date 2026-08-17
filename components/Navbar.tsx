@@ -48,7 +48,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        <a href="#hero-upload" className="btn-primary !px-4 !py-2 text-xs sm:text-sm sm:!px-5">
+        <a href="#upload" className="btn-primary !px-4 !py-2 text-xs sm:text-sm sm:!px-5">
           Sign up – It&apos;s FREE
         </a>
       </nav>

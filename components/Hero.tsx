@@ -1,4 +1,4 @@
-import UploadBox from "./UploadBox";
+import VideoUpload from "./VideoUpload";
 import ProductPreview from "./ProductPreview";
 import Reveal from "./Reveal";
 
@@ -28,7 +28,7 @@ export default function Hero() {
         </Reveal>
 
         <Reveal delay={150} className="mt-10">
-          <UploadBox />
+          <VideoUpload />
         </Reveal>
 
         <Reveal delay={250}>
