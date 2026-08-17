@@ -47,8 +47,44 @@ class NotConfiguredPublisher implements SocialPublisher {
   async disconnectAccount() {}
 }
 
+import { youtubeConfigured, getChannelInfo, uploadShort } from "./youtube";
+
+class YouTubeShortsPublisher implements SocialPublisher {
+  readonly platform = "youtube_shorts" as const;
+  async connectAccount() {
+    if (!youtubeConfigured()) return { status: "not_configured" as const };
+    await getChannelInfo(); // verifies credentials
+    return { status: "published" as const };
+  }
+  async publishVideo(opts: { clipPath: string; caption: string; title?: string; privacy?: "private" | "unlisted" | "public" }) {
+    if (!youtubeConfigured()) return { status: "not_configured" as const };
+    const { url } = await uploadShort({
+      filePath: opts.clipPath,
+      title: opts.title ?? opts.caption.slice(0, 90),
+      description: opts.caption,
+      privacy: opts.privacy ?? "public",
+    });
+    return { status: "published" as const, postUrl: url };
+  }
+  async scheduleVideo(opts: { clipPath: string; caption: string; publishAt: Date; timezone: string; title?: string }) {
+    if (!youtubeConfigured()) return { status: "not_configured" as const };
+    await uploadShort({
+      filePath: opts.clipPath,
+      title: opts.title ?? opts.caption.slice(0, 90),
+      description: opts.caption,
+      privacy: "private",
+      publishAt: opts.publishAt.toISOString(),
+    });
+    return { status: "scheduled" as const };
+  }
+  async getPublishStatus() {
+    return "published" as const;
+  }
+  async disconnectAccount() {}
+}
+
 const registry: Record<Platform, SocialPublisher> = {
-  youtube_shorts: new NotConfiguredPublisher("youtube_shorts"),
+  youtube_shorts: new YouTubeShortsPublisher(),
   tiktok: new NotConfiguredPublisher("tiktok"),
   instagram_reels: new NotConfiguredPublisher("instagram_reels"),
   facebook: new NotConfiguredPublisher("facebook"),

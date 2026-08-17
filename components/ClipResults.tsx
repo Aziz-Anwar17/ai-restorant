@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PublishModal from "./PublishModal";
 
 export type Clip = {
   id: string;
@@ -44,6 +45,7 @@ export default function ClipResults({
   onReset: () => void;
 }) {
   const [preview, setPreview] = useState<Clip | null>(null);
+  const [publishClip, setPublishClip] = useState<Clip | null>(null);
 
   return (
     <div className="text-left">
@@ -124,10 +126,20 @@ export default function ClipResults({
                   Download MP4
                 </a>
               </div>
+              <button
+                onClick={() => setPublishClip(c)}
+                className="btn-secondary mt-2 w-full !px-3 !py-2 text-xs"
+              >
+                ↗ Publish
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {publishClip && (
+        <PublishModal clip={publishClip} onClose={() => setPublishClip(null)} />
+      )}
 
       {/* Preview modal */}
       {preview && (
