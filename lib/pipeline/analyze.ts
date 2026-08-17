@@ -30,7 +30,7 @@ Each selected clip must:
 - avoid unnecessary dead air
 - have a clear ending
 - contain enough context
-- preferably be 20-90 seconds long (shorter is acceptable only if the source video is very short)
+- be AT MOST 90 seconds long — this is a hard limit, never exceed it. Aim for 20-60 seconds; if a strong story arc is longer than 90 seconds, select only its most powerful 90-second (or shorter) portion instead of the whole arc. Shorter than 20 seconds is acceptable only if the source video is very short.
 - not overlap substantially with another selected clip
 Start and end timestamps MUST fall within the transcript's time range and align with natural sentence boundaries.
 Use the select_clips tool to return your answer. Respond with the tool call only.`;
@@ -87,6 +87,8 @@ function transcriptToPrompt(t: Transcript): string {
     .join("\n");
 }
 
+const MAX_CLIP_SEC = 90;
+
 export async function selectClips(
   transcript: Transcript,
   clipCount: number,
@@ -132,7 +134,8 @@ ${transcriptToPrompt(transcript)}`;
         .map((c) => ({
           ...c,
           start: Math.max(0, c.start),
-          end: Math.min(videoDurationSec, c.end),
+          // hard safety net: never render past the 90s cap even if the model ignores it
+          end: Math.min(videoDurationSec, c.end, Math.max(0, c.start) + MAX_CLIP_SEC),
           // tolerate models answering on a 0-1 scale despite the 0-100 spec
           score: Math.round(c.score <= 1 ? c.score * 100 : c.score),
         }))
