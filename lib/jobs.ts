@@ -135,6 +135,7 @@ async function runJob(jobId: string) {
         sourceWidth: video.width ?? 1920,
         sourceHeight: video.height ?? 1080,
         segments: transcript.segments,
+        words: transcript.words,
       });
       insertClip.run(
         genId("clip"),

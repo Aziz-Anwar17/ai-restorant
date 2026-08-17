@@ -4,7 +4,7 @@ import { run } from "../exec";
 import { config } from "../config";
 import { storagePaths } from "../storage";
 import { buildAssForClip } from "./captions";
-import type { TranscriptSegment } from "./transcribe";
+import type { TranscriptSegment, TranscriptWord } from "./transcribe";
 
 export type RenderResult = { filePath: string; thumbPath: string };
 
@@ -23,8 +23,9 @@ export async function renderClip(opts: {
   sourceWidth: number;
   sourceHeight: number;
   segments: TranscriptSegment[];
+  words?: TranscriptWord[];
 }): Promise<RenderResult> {
-  const { sourcePath, jobId, index, start, end, sourceWidth, sourceHeight, segments } = opts;
+  const { sourcePath, jobId, index, start, end, sourceWidth, sourceHeight, segments, words } = opts;
   const clipsDir = storagePaths.clips(jobId);
   const thumbsDir = storagePaths.thumbs(jobId);
   const num = String(index + 1).padStart(2, "0");
@@ -32,7 +33,7 @@ export async function renderClip(opts: {
   const thumbPath = path.join(thumbsDir, `clip-${num}.jpg`);
   const assPath = path.join(storagePaths.tmp(), `${jobId}-${num}.ass`);
 
-  fs.writeFileSync(assPath, buildAssForClip(segments, start, end), "utf8");
+  fs.writeFileSync(assPath, buildAssForClip(segments, start, end, words), "utf8");
 
   const srcAspect = sourceWidth / sourceHeight;
   const targetAspect = 9 / 16;

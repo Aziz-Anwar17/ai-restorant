@@ -1,14 +1,14 @@
-import type { TranscriptSegment } from "./transcribe";
+import type { TranscriptSegment, TranscriptWord } from "./transcribe";
 
 /**
  * Build an ASS subtitle file for one clip.
- * Whisper gives segment-level timestamps; we split long segments into short
- * caption chunks (max ~5 words) and distribute timing linearly across the
- * segment. Timing within a segment is therefore estimated, but the text and
- * segment boundaries come from the real transcript.
+ * Preferred path: word-level timestamps from whisper.cpp tokens — captions are
+ * grouped into short phrases with exact word timing. Fallback (no word data):
+ * split segments into chunks and distribute timing linearly.
  */
 
 const MAX_WORDS_PER_CAPTION = 5;
+const MAX_CAPTION_GAP_SEC = 0.8; // start a new caption after a pause
 
 function fmtAssTime(sec: number): string {
   const s = Math.max(0, sec);
@@ -22,13 +22,60 @@ function escapeAss(text: string): string {
   return text.replace(/[{}]/g, "").replace(/\n/g, " ");
 }
 
+type CaptionEvent = { start: number; end: number; text: string };
+
+function eventsFromWords(
+  words: TranscriptWord[],
+  clipStart: number,
+  clipEnd: number
+): CaptionEvent[] {
+  const inClip = words.filter((w) => w.end > clipStart && w.start < clipEnd);
+  const events: CaptionEvent[] = [];
+  let group: TranscriptWord[] = [];
+
+  const flush = () => {
+    if (group.length === 0) return;
+    const start = Math.max(group[0].start, clipStart) - clipStart;
+    const end = Math.min(group[group.length - 1].end, clipEnd) - clipStart;
+    if (end - start >= 0.12) {
+      events.push({ start, end, text: group.map((w) => w.text).join(" ") });
+    }
+    group = [];
+  };
+
+  for (const w of inClip) {
+    const prev = group[group.length - 1];
+    const pause = prev ? w.start - prev.end : 0;
+    const endsSentence = prev ? /[.!?…]$/.test(prev.text) : false;
+    if (
+      group.length >= MAX_WORDS_PER_CAPTION ||
+      pause > MAX_CAPTION_GAP_SEC ||
+      endsSentence
+    ) {
+      flush();
+    }
+    group.push(w);
+  }
+  flush();
+
+  // keep each caption on screen until the next one starts (no flicker gaps)
+  for (let i = 0; i < events.length - 1; i++) {
+    const gap = events[i + 1].start - events[i].end;
+    if (gap > 0 && gap <= MAX_CAPTION_GAP_SEC) events[i].end = events[i + 1].start;
+  }
+  return events;
+}
+
 export function buildAssForClip(
   segments: TranscriptSegment[],
   clipStart: number,
-  clipEnd: number
+  clipEnd: number,
+  words: TranscriptWord[] = []
 ): string {
-  const events: { start: number; end: number; text: string }[] = [];
+  const events: CaptionEvent[] =
+    words.length > 0 ? eventsFromWords(words, clipStart, clipEnd) : [];
 
+  if (events.length === 0)
   for (const seg of segments) {
     if (seg.end <= clipStart || seg.start >= clipEnd) continue;
     const words = seg.text.split(/\s+/).filter(Boolean);
