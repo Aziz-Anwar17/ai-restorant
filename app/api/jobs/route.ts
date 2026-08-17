@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { createJob } from "@/lib/jobs";
+import { config } from "@/lib/config";
+import { getUserFromRequest, deductCredits } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -25,6 +27,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Video not found." }, { status: 404 });
   }
 
-  const jobId = createJob(String(body.videoId), clipCount);
-  return NextResponse.json({ jobId }, { status: 201 });
+  // Signed-in users spend credits (deducted up front, failed clips refunded
+  // on completion). Anonymous users may still try the product — Phase 2 keeps
+  // login out of the critical path per the UX priorities.
+  const user = await getUserFromRequest(req);
+  const cost = clipCount * config.creditsPerClip;
+
+  // Deduct BEFORE enqueueing so an unpaid job never starts running.
+  const ref = `pre_${Date.now().toString(36)}`;
+  if (user && !deductCredits(user.uid, cost, ref)) {
+    return NextResponse.json(
+      { error: `Not enough credits: this run needs ${cost}, you have ${user.credits}.` },
+      { status: 402 }
+    );
+  }
+
+  const jobId = createJob(String(body.videoId), clipCount, user?.uid ?? null);
+  if (user) {
+    getDb()
+      .prepare("UPDATE credit_transactions SET job_id=? WHERE job_id=?")
+      .run(jobId, ref);
+  }
+
+  return NextResponse.json({ jobId, cost: user ? cost : 0 }, { status: 201 });
 }

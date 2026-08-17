@@ -1,16 +1,24 @@
 import { NextResponse } from "next/server";
+import { getUserFromRequest, authConfigured } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-/**
- * Auth is Phase 2 (Firebase Auth). This endpoint honestly reports the
- * anonymous state instead of pretending a user is logged in.
- */
-export async function GET() {
+export async function GET(req: Request) {
+  if (!authConfigured()) {
+    return NextResponse.json({
+      authenticated: false,
+      user: null,
+      authProvider: "none",
+      note: "Authentication is not configured (FIREBASE_PROJECT_ID missing).",
+    });
+  }
+  const user = await getUserFromRequest(req);
+  if (!user) {
+    return NextResponse.json({ authenticated: false, user: null, authProvider: "firebase" });
+  }
   return NextResponse.json({
-    authenticated: false,
-    user: null,
-    authProvider: "none",
-    note: "Authentication is not enabled yet. Firebase Auth is planned for Phase 2.",
+    authenticated: true,
+    authProvider: "firebase",
+    user,
   });
 }

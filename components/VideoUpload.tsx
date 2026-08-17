@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ClipResults, { type Clip } from "./ClipResults";
+import { useAuth, authedFetch } from "./AuthProvider";
 
 type VideoMeta = {
   id: string;
@@ -62,6 +63,7 @@ export default function VideoUpload() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { refreshProfile } = useAuth();
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -120,7 +122,7 @@ export default function VideoUpload() {
     if (!video) return;
     setError(null);
     try {
-      const res = await fetch("/api/jobs", {
+      const res = await authedFetch("/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ videoId: video.id, clipCount }),
@@ -139,6 +141,7 @@ export default function VideoUpload() {
             stopPolling();
             setClips(d.clips);
             setPhase("completed");
+            refreshProfile(); // credits may have been deducted/refunded
           } else if (d.job.status === "failed") {
             stopPolling();
             setError(d.job.error ?? "Processing failed. Please try again.");

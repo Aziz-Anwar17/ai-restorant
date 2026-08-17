@@ -6,6 +6,8 @@ import { downloadYouTubeVideo } from "./pipeline/youtube";
 import { extractAudio, transcribe, type Transcript } from "./pipeline/transcribe";
 import { selectClips } from "./pipeline/analyze";
 import { renderClip } from "./pipeline/render";
+import { refundCredits } from "./auth";
+import { config } from "./config";
 
 export type JobStatus =
   | "queued"
@@ -60,6 +62,7 @@ async function runJob(jobId: string) {
     id: string;
     video_id: string;
     total_clips: number;
+    user_id: string | null;
   };
   const video = db
     .prepare("SELECT * FROM videos WHERE id=?")
@@ -161,8 +164,20 @@ async function runJob(jobId: string) {
     setStatus(jobId, "finalizing");
     cleanupFiles(tempFiles);
     setStatus(jobId, "completed");
+    // refund credits for clips the AI chose not to produce
+    if (job.user_id && plan.clips.length < job.total_clips) {
+      refundCredits(
+        job.user_id,
+        (job.total_clips - plan.clips.length) * config.creditsPerClip,
+        jobId
+      );
+    }
   } catch (err) {
     cleanupFiles(tempFiles);
+    // failed run → full refund
+    if (job.user_id) {
+      refundCredits(job.user_id, job.total_clips * config.creditsPerClip, jobId);
+    }
     // Only surface messages we wrote for users (configuration problems);
     // everything else gets a safe stage-specific message, details go to logs.
     const msg =
@@ -206,13 +221,17 @@ function getQueue(): Queue {
   return g.__dapurQueue;
 }
 
-export function createJob(videoId: string, totalClips: number): string {
+export function createJob(
+  videoId: string,
+  totalClips: number,
+  userId: string | null = null
+): string {
   const db = getDb();
   const jobId = genId("job");
   db.prepare(
     `INSERT INTO processing_jobs (id, user_id, video_id, status, progress, total_clips, completed_clips, created_at, updated_at)
-     VALUES (?, NULL, ?, 'queued', 0, ?, 0, ?, ?)`
-  ).run(jobId, videoId, totalClips, now(), now());
+     VALUES (?, ?, ?, 'queued', 0, ?, 0, ?, ?)`
+  ).run(jobId, userId, videoId, totalClips, now(), now());
 
   const q = getQueue();
   q.chain = q.chain.then(() => runJob(jobId)).catch(() => {});

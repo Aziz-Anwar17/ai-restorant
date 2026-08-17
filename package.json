@@ -11,6 +11,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
     "better-sqlite3": "^13.0.3",
+    "firebase": "^12.17.1",
+    "jose": "^6.2.9",
     "next": "14.2.15",
     "react": "18.3.1",
     "react-dom": "18.3.1",
