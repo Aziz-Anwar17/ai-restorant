@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_FIREBASE_API_KEY: ${NEXT_PUBLIC_FIREBASE_API_KEY}
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+        NEXT_PUBLIC_FIREBASE_APP_ID: ${NEXT_PUBLIC_FIREBASE_APP_ID}
+    image: ai-restorant:latest
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      - PORT=3789
+    volumes:
+      - app-data:/data
+    expose:
+      - "3789"
+    networks: [web]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [web]
+    depends_on: [app]
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  web:

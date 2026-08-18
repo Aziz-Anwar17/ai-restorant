@@ -1,0 +1,7 @@
+asianorestaurant.co.uk, www.asianorestaurant.co.uk {
+	reverse_proxy app:3789
+	encode gzip
+	request_body {
+		max_size 2GB
+	}
+}

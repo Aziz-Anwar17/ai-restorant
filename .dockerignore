@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+storage
+docs
+*.md
+.env*
+!.env.example
+scripts/youtube-oauth.mjs
