@@ -10,7 +10,7 @@ const columns: { title: string; links: FooterLink[] }[] = [
     title: "Company",
     links: [
       { label: "About Us" },
-      { label: "Careers", badge: { text: "We're hiring!", style: "hiring" } },
+      { label: "Careers" },
       { label: "Contact Us" },
       { label: "Press & Media" },
     ],
@@ -89,9 +89,6 @@ export default function Footer() {
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-400">
               Turn one long video into dozens of viral clips — automatically.
-            </p>
-            <p className="mt-3 text-xs text-zinc-500">
-              Trusted by 500,000+ creators worldwide
             </p>
 
             {/* Newsletter */}

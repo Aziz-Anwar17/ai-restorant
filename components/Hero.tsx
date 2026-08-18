@@ -13,7 +13,7 @@ export default function Hero() {
 
       <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6">
         <Reveal>
-          <p className="eyebrow mb-6">#1 AI Video Clipping Tool</p>
+          <p className="eyebrow mb-6">AI Video Clipping Tool</p>
           <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-6xl lg:text-7xl">
             1 long video, 10 viral clips.
             <br />
