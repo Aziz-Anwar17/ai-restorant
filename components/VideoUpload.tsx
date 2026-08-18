@@ -61,6 +61,14 @@ export default function VideoUpload() {
   const [ytUrl, setYtUrl] = useState("");
   const [clipCount, setClipCount] = useState(10);
   const [dragOver, setDragOver] = useState(false);
+  const [pipelineReady, setPipelineReady] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => setPipelineReady(Boolean(d.ready)))
+      .catch(() => setPipelineReady(null));
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { refreshProfile } = useAuth();
@@ -299,6 +307,13 @@ export default function VideoUpload() {
           dragOver ? "border-brand/60 bg-brand/5" : ""
         }`}
       >
+        {pipelineReady === false && (
+          <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3 text-xs text-amber-300">
+            ⚠ This deployment serves the interface only — video processing runs
+            on the AI Restorant processing host, which isn&apos;t connected
+            here. Uploads and YouTube analysis won&apos;t work on this page.
+          </p>
+        )}
         <p className="text-lg font-bold text-white">Upload your video</p>
         <p className="mt-1 text-sm text-zinc-500">
           Drag &amp; drop or choose a file — MP4, MOV, WebM, M4V

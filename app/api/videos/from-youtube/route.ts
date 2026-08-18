@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
 import { config } from "@/lib/config";
 import { getDb, genId, now } from "@/lib/db";
 import { validateYouTubeUrl, fetchYouTubeMeta } from "@/lib/pipeline/youtube";
@@ -7,6 +8,15 @@ export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
+  if (!fs.existsSync(config.ytdlpBin)) {
+    return NextResponse.json(
+      {
+        error:
+          "Video processing isn't available on this deployment — it runs on the AI Restorant processing host (yt-dlp/ffmpeg/whisper are not installed here).",
+      },
+      { status: 503 }
+    );
+  }
   let body: { url?: string };
   try {
     body = await req.json();
