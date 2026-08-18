@@ -74,6 +74,12 @@ function init(): Database.Database {
       status TEXT NOT NULL DEFAULT 'disconnected',
       created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS anon_usage (
+      ip TEXT NOT NULL,
+      day TEXT NOT NULL,               -- YYYY-MM-DD (UTC)
+      jobs INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (ip, day)
+    );
     CREATE TABLE IF NOT EXISTS scheduled_posts (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
