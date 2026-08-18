@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
 import { config } from "@/lib/config";
+import { which } from "@/lib/exec";
 import { getDb, genId, now } from "@/lib/db";
 import { validateYouTubeUrl, fetchYouTubeMeta } from "@/lib/pipeline/youtube";
+import { getUserFromRequest } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 export async function POST(req: NextRequest) {
-  if (!fs.existsSync(config.ytdlpBin)) {
+  if (!(await which(config.ytdlpBin))) {
     return NextResponse.json(
       {
         error:
@@ -46,9 +47,16 @@ export async function POST(req: NextRequest) {
     getDb()
       .prepare(
         `INSERT INTO videos (id, user_id, source, source_url, original_name, file_path, duration_sec, width, height, size_bytes, created_at)
-         VALUES (?, NULL, 'youtube', ?, ?, NULL, ?, NULL, NULL, NULL, ?)`
+         VALUES (?, ?, 'youtube', ?, ?, NULL, ?, NULL, NULL, NULL, ?)`
       )
-      .run(videoId, url.toString(), meta.title, meta.durationSec, now());
+      .run(
+        videoId,
+        (await getUserFromRequest(req))?.uid ?? null,
+        url.toString(),
+        meta.title,
+        meta.durationSec,
+        now()
+      );
 
     return NextResponse.json({
       video: {

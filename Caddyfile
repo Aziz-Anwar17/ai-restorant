@@ -1,4 +1,4 @@
-asianorestaurant.co.uk, www.asianorestaurant.co.uk {
+YOUR_DOMAIN.com, www.YOUR_DOMAIN.com {
 	reverse_proxy app:3789
 	encode gzip
 	request_body {

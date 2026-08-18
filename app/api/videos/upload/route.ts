@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 import { config } from "@/lib/config";
 import { getDb, genId, now } from "@/lib/db";
 import { storagePaths } from "@/lib/storage";
 import { probeVideo } from "@/lib/pipeline/probe";
+import { getUserFromRequest } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -39,8 +42,11 @@ export async function POST(req: NextRequest) {
       storagePaths.uploads(),
       `${videoId}${ext || ".mp4"}`
     );
-    const buf = Buffer.from(await file.arrayBuffer());
-    fs.writeFileSync(destPath, buf);
+    // Stream ke disk — jangan buffer file (hingga 2GB) ke RAM
+    await pipeline(
+      Readable.fromWeb(file.stream() as import("stream/web").ReadableStream),
+      fs.createWriteStream(destPath)
+    );
 
     let info;
     try {
@@ -63,10 +69,11 @@ export async function POST(req: NextRequest) {
     getDb()
       .prepare(
         `INSERT INTO videos (id, user_id, source, source_url, original_name, file_path, duration_sec, width, height, size_bytes, created_at)
-         VALUES (?, NULL, 'upload', NULL, ?, ?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, 'upload', NULL, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         videoId,
+        (await getUserFromRequest(req))?.uid ?? null,
         file.name,
         destPath,
         info.durationSec,

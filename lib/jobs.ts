@@ -215,10 +215,50 @@ function stageMessage(jobId: string): string {
 
 // ---- In-process job queue (single worker, survives dev reloads) ----
 type Queue = { chain: Promise<void> };
-const g = globalThis as unknown as { __dapurQueue?: Queue };
+const g = globalThis as unknown as { __dapurQueue?: Queue; __dapurRecovered?: boolean };
 function getQueue(): Queue {
   if (!g.__dapurQueue) g.__dapurQueue = { chain: Promise.resolve() };
   return g.__dapurQueue;
+}
+
+// Jobs run in-process, so a server restart orphans anything mid-flight:
+// stuck forever at "rendering" with the user's credits held. On the first
+// queue touch after boot, fail those jobs and refund — unless a refund for
+// that job already exists (double-refund guard).
+export function recoverOrphanedJobs() {
+  if (g.__dapurRecovered) return;
+  g.__dapurRecovered = true;
+  const db = getDb();
+  const orphans = db
+    .prepare(
+      `SELECT id, user_id, total_clips, completed_clips FROM processing_jobs
+       WHERE status NOT IN ('completed','failed')`
+    )
+    .all() as { id: string; user_id: string | null; total_clips: number; completed_clips: number }[];
+  for (const j of orphans) {
+    db.prepare(
+      "UPDATE processing_jobs SET status='failed', error=?, updated_at=? WHERE id=?"
+    ).run(
+      "Processing was interrupted by a server restart. Please try again.",
+      now(),
+      j.id
+    );
+    if (j.user_id) {
+      const refunded = db
+        .prepare(
+          "SELECT 1 FROM credit_transactions WHERE job_id=? AND amount > 0 LIMIT 1"
+        )
+        .get(j.id);
+      if (!refunded) {
+        refundCredits(
+          j.user_id,
+          (j.total_clips - j.completed_clips) * config.creditsPerClip,
+          j.id
+        );
+      }
+    }
+    console.error(`[recovery] orphaned job ${j.id} marked failed`);
+  }
 }
 
 export function createJob(
@@ -227,6 +267,7 @@ export function createJob(
   userId: string | null = null
 ): string {
   const db = getDb();
+  recoverOrphanedJobs();
   const jobId = genId("job");
   db.prepare(
     `INSERT INTO processing_jobs (id, user_id, video_id, status, progress, total_clips, completed_clips, created_at, updated_at)

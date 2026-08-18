@@ -32,5 +32,5 @@ ssh "$HOST" 'for i in $(seq 1 30); do
     echo "✓ Pipeline healthy"; exit 0; fi; sleep 10; done; echo "✗ Health check timed out"; exit 1'
 
 echo
-echo "✓ Deployed. Point DNS A records for asianorestaurant.co.uk (and www) to this VPS's IP."
+echo "✓ Deployed. Point DNS A records for YOUR_DOMAIN.com (and www) to this VPS's IP."
 echo "  Caddy will obtain SSL certificates automatically once DNS resolves."

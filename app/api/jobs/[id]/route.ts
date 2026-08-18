@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { recoverOrphanedJobs } from "@/lib/jobs";
 
 export const runtime = "nodejs";
 
@@ -8,6 +9,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const db = getDb();
+  recoverOrphanedJobs();
   const job = db
     .prepare("SELECT * FROM processing_jobs WHERE id=?")
     .get(params.id) as
