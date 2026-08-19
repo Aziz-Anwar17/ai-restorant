@@ -13,6 +13,9 @@ export default function ClipAnything() {
           vlogs, gaming, sports, interviews, explainer videos — into viral
           clips in 1 click.
         </p>
+        <a href="#upload" className="btn-primary mt-6 inline-flex">
+          Try ClipAnything
+        </a>
       </div>
     </Reveal>
   );

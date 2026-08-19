@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Video processing isn't available on this deployment — it runs on the AI Restorant processing host (yt-dlp/ffmpeg/whisper are not installed here).",
+          "Video processing is temporarily unavailable. Please try again later.",
       },
       { status: 503 }
     );

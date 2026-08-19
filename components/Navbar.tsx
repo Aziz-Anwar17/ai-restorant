@@ -9,7 +9,7 @@ const links = [
   { label: "AI Models", href: "/#ai-models" },
   { label: "Automation", href: "/#automation" },
   { label: "AI Editor", href: "/#ai-editor" },
-  { label: "Pricing", href: "/#cta" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export default function Navbar() {

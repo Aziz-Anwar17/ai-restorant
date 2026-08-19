@@ -3,7 +3,8 @@
 # Usage: ./scripts/deploy-vps.sh root@YOUR_VPS_IP
 set -euo pipefail
 
-HOST="${1:?Usage: deploy-vps.sh user@vps-ip}"
+HOST="${1:?Usage: deploy-vps.sh user@vps-ip [domain]}"
+DOMAIN="${2:-${DOMAIN:-asianorestaurant.co.uk}}"
 REPO="https://github.com/Aziz-Anwar17/ai-restorant.git"
 DIR=/opt/ai-restorant
 
@@ -22,6 +23,9 @@ ssh "$HOST" "command -v git >/dev/null || (apt-get update -qq && apt-get install
 
 echo "→ Uploading secrets (.env.production)…"
 scp -q .env.production "$HOST:$DIR/.env.production"
+
+echo "→ Writing Caddyfile for $DOMAIN…"
+ssh "$HOST" "cd $DIR && sed 's/YOUR_DOMAIN\\.com/$DOMAIN/g' Caddyfile > Caddyfile.deployed && mv Caddyfile.deployed Caddyfile"
 
 echo "→ Building and starting containers (first build takes ~10 min)…"
 ssh "$HOST" "cd $DIR && docker compose --env-file .env.production up -d --build"

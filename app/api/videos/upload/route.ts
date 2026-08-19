@@ -14,6 +14,13 @@ export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   try {
+    // Serving-only deployments (no ffmpeg/ffprobe) can't process uploads.
+    if (!fs.existsSync("/usr/bin/ffprobe") && !process.env.FFPROBE_BIN && !fs.existsSync("/opt/homebrew/opt/ffmpeg-full/bin/ffprobe")) {
+      return NextResponse.json(
+        { error: "Video processing is temporarily unavailable. Please try again later." },
+        { status: 503 }
+      );
+    }
     const form = await req.formData();
     const file = form.get("file");
     if (!(file instanceof File)) {
